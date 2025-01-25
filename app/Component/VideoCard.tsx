@@ -7,6 +7,7 @@ import realtiveTime from "dayjs/plugin/relativeTime";
 import { filesize } from "filesize";
 import { video } from "@prisma/client";
 
+
 dayjs.extend(realtiveTime);
 
 interface VideoCardProps {
@@ -96,6 +97,8 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onDownload }) => {
           <img
             src={getThumbnailUrl(video.publicId)}
             alt={video.title}
+            width={400}
+            height={225}
             className="w-full h-full object-cover"
           />
         )}

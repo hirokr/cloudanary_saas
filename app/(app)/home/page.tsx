@@ -17,13 +17,14 @@ function Home() {
       } else {
         throw new Error(" Unexpected response format");
       }
-    } catch (error) {
+    } catch (err) {
       console.log(error);
+      console.log(err)
       setError("Failed to fetch videos");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [error]);
 
   useEffect(() => {
     fetchVideos();
