@@ -1,9 +1,9 @@
-
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import VideoCard from "@/app/Component/VideoCard";
 import { Video } from "@/types";
+import Link from "next/link";
 function Home() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +19,7 @@ function Home() {
       }
     } catch (err) {
       console.log(error);
-      console.log(err)
+      console.log(err);
       setError("Failed to fetch videos");
     } finally {
       setLoading(false);
@@ -31,7 +31,7 @@ function Home() {
   }, [fetchVideos]);
 
   const handleDownload = useCallback((url: string, title: string) => {
-    const x = ()=>{
+    const x = () => {
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", `${title}.mp4`);
@@ -39,8 +39,8 @@ function Home() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }
-    x()
+    };
+    x();
   }, []);
 
   if (loading) {
@@ -50,6 +50,9 @@ function Home() {
   return (
     <div className='container mx-auto p-4'>
       <h1 className='text-2xl font-bold mb-4'>Videos</h1>
+      <Link href='/home'>
+        <h1>Main Site</h1>
+      </Link>
       {videos.length === 0 ? (
         <div className='text-center text-lg text-gray-500'>
           No videos available
