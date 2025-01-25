@@ -13,7 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Video {
+model video {
   id             String   @id @default(cuid())
   title          String
   description    String?

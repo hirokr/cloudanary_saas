@@ -5,13 +5,12 @@ import { Clock, Download, FileDown, FileUp } from "lucide-react";
 import dayjs from "dayjs";
 import realtiveTime from "dayjs/plugin/relativeTime";
 import { filesize } from "filesize";
-import { Video } from "@prisma/client";
-import Image from "next/image";
+import { video } from "@prisma/client";
 
 dayjs.extend(realtiveTime);
 
 interface VideoCardProps {
-  video: Video;
+  video: video;
   onDownload: (url: string, title: string) => void;
 }
 
@@ -94,7 +93,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onDownload }) => {
             />
           )
         ) : (
-          <Image
+          <img
             src={getThumbnailUrl(video.publicId)}
             alt={video.title}
             className="w-full h-full object-cover"

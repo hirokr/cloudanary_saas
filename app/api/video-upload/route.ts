@@ -7,8 +7,8 @@ const prisma = new PrismaClient();
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUD_NAME,
-  api_key: process.env.COKUDINARY_API_KEY,
-  api_secret: process.env.CLUDINARY_API_SECRET,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 interface CloudinaryUploadResult {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData();
-    const file = formData.get("file") as File | null;
+    const file = formData.get("file") as File;
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const originalSize = formData.get("originalSize") as string;
@@ -48,24 +48,42 @@ export async function POST(request: NextRequest) {
     }
 
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const buffer = Buffer.from(new Uint8Array(bytes));
+
+    // console.log({
+    //   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    //   api_key: process.env.CLOUDINARY_API_KEY,
+    //   api_secret: process.env.CLOUDINARY_API_SECRET,
+    // });
+    // console.log("File:", file);
+    // console.log("Buffer length:", buffer.length);
+    // const dummyBuffer = Buffer.from("Test file content");
+    // console.log("Dummy buffer length:", dummyBuffer.length);
 
     const result = await new Promise<CloudinaryUploadResult>(
       (resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          {
-            resource_type: "video",
-            folder: "video-uploads",
-            transformation: [{ quality: "auto", fetch_format: "mp4" }],
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result as CloudinaryUploadResult);
-          }
-        );
-        uploadStream.end(buffer);
+        cloudinary.uploader
+          .upload_stream(
+            {
+              resource_type: "video",
+              folder: "video-uploads",
+              chunk_size: 6000000, // 6MB chunks
+              timeout: 120000, // 120 seconds timeout
+              transformation: [{ quality: "auto", fetch_format: "mp4" }],
+            },
+            function (error, result) {
+              if (error) {
+                console.error("Cloudinary upload error:", error);
+                return reject(error);
+              }
+              resolve(result as CloudinaryUploadResult);
+            }
+          )
+          .end(buffer);
       }
     );
+    // const result = await cloudinary.uploader.upload();
+    console.log("done");
     const video = await prisma.video.create({
       data: {
         title,
@@ -76,6 +94,8 @@ export async function POST(request: NextRequest) {
         compressedSize: String(result.bytes),
       },
     });
+    console.log("uploaded");
+    console.log(result.public_id);
 
     return NextResponse.json(video);
   } catch (error) {
